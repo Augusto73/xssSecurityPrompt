@@ -53,3 +53,4 @@ STEP 3: LIVELLO 3 (controllo manuale)
   4. Segna ✓ ogni punto OK
   5. Punto 4: verifica maxlength = VARCHAR DB
   6. Fine
+
