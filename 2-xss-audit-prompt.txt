@@ -1,0 +1,59 @@
+Rispondi solo in italiano
+
+Cerca di essere sintetico e preciso (sono DSA/ADHD), senza spiegazioni ridondanti.
+
+AUDIT DETTAGLIATO - Verifica ogni punto:
+
+0. Analizza i file: 
+	- owasp-encoding.js allegato 
+	- JSP allegato
+
+
+1. LIBRERIA OWASP
+   Cerca: <%@ taglib prefix="enc" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>      
+   Cerca: <script src="<spring:url value='/resources/js/owasp-encoding.js' />"></script>
+   Verifica: PRIMA di altri <script>
+
+2a. HTML CONTENT → encodeHTML()
+    Cerca: '<p>' + valore + '</p>'
+    Verifica: tutti i valori da DB/JSON usano encodeHTML()
+
+2b. ATTRIBUTI HTML → encodeATTR()
+    Cerca: '<input title="' + valore + '"'
+    Verifica: tutti gli attributi usano encodeATTR()
+
+2c. PARAMETRI URL → encodeURIParam()
+    Cerca: 'path?id=' + valore
+    Verifica: tutti i parametri usano encodeURIParam()
+
+2d. ID NUMERICI → sanitizeInteger()
+    Cerca: '/detail?id=' + data
+    Verifica: tutti gli ID usano sanitizeInteger()
+
+3a. HTML CONTENT JSP → <c:out>
+    Cerca: <p>${supplier.name}</p> (fuori <form:*>)
+    Verifica: tutti usano <c:out>
+
+3b. ATTRIBUTI HTML JSP → enc:forHtmlAttribute()
+    Cerca: title="${var}" (fuori <form:*>)
+    Verifica: tutti usano enc:forHtmlAttribute()
+
+IGNORA (gia safe):
+- <spring:message>
+- <form:*> tags
+- Enum numerici
+- Boolean calcolati (var x = status == 1)
+- ${enc:forJavaScript(...)} in <script>
+
+FORMATO RISPOSTA:
+✓ 1 OK
+✓ 2a OK
+✗ 2b - var x = '<input title="' + data + '">';
+       → var x = '<input title="' + encodeATTR(data) + '">';
+✓ 2c OK
+...
+
+RIEPILOGO: Conformi X/7, Non conformi Y/7
+
+JSP da analizzare:
+[Codice qui]

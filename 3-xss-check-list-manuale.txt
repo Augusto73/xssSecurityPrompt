@@ -1,0 +1,110 @@
+CHECKLIST XSS SECURITY - JSP/Spring MVC
+========================================
+
+1. LIBRERIA OWASP CARICATA
+    PRIMA di qualsiasi script (se non esiste):
+    <script src="<spring:url value='/resources/js/owasp-encoding.js' />"></script>
+    
+
+═══════════════════════════════════════════════════════════════
+PARTE JAVASCRIPT (dentro tag <script>)
+═══════════════════════════════════════════════════════════════
+
+2a. HTML CONTENT → encodeHTML()
+    QUANDO: costruisci HTML in JavaScript
+    CERCA: var html = '<p>' + valore + '</p>'
+    
+    NO: var value = '<p>' + data.substring(0,30) + '</p>';
+    OK: var value = '<p>' + encodeHTML(data.substring(0,30)) + '</p>';
+
+
+2b. ATTRIBUTI HTML → encodeATTR()
+    QUANDO: costruisci attributi HTML in JavaScript
+    CERCA: var html = '<input title="' + valore + '"'
+    
+    NO: var checkbox = '<input title="' + data + '">';
+    OK: var checkbox = '<input title="' + encodeATTR(data) + '" value="' + encodeATTR(full.name) + '">';
+    OK: var html = '<p title="' + encodeATTR(data) + '">' + encodeHTML(data) + '</p>';
+
+
+2c. PARAMETRI URL → encodeURIParam()
+    QUANDO: aggiungi parametri a URL in JavaScript
+    CERCA: var url = 'path?id=' + valore
+    
+    NO: var url = 'base?id=' + id;
+    OK: var url = 'base?id=' + encodeURIParam(id) + '&name=' + encodeURIParam(userName);
+    OK: $(form).attr('action', baseUrl + '?id=' + encodeURIParam(id));
+
+
+2d. ID NUMERICI → sanitizeInteger()
+    QUANDO: usi ID da database in JavaScript
+    CERCA: '/detail?id=' + data
+    
+    NO: var url = '/detail?requestp=' + data;
+    OK: var url = '/detail?requestp=' + sanitizeInteger(data);
+
+
+═══════════════════════════════════════════════════════════════
+PARTE JSP (fuori da tag <script>)
+═══════════════════════════════════════════════════════════════
+
+3a. HTML CONTENT → <c:out>
+    QUANDO: mostri dati database in HTML normale (NON dentro <form:*>)
+    CERCA: <p>${supplier.name}</p>
+    
+    NO: <p>${supplier.name}</p>
+    OK: <p><c:out value="${supplier.name}" /></p>
+    OK: <div><c:out value="${bean.city}" /></div>
+
+
+3b. ATTRIBUTI HTML → enc:forHtmlAttribute()
+    QUANDO: metti dati in attributi HTML (title, data-*, ecc.)
+    CERCA: title="${variabile}"
+    
+    NO: <label title="${cityVar}">Citta</label>
+    
+    OK: <spring:message var="sapCodeVar" code="supplier.sapCode" />
+        <form:label title="${enc:forHtmlAttribute(sapCodeVar)}">
+    
+    OK: <label title="${enc:forHtmlAttribute(cityVar)}">Citta</label>
+
+
+═══════════════════════════════════════════════════════════════
+
+4. INPUT UTENTE (validazione lunghezza)
+    QUANDO: hai <input>, <textarea> NON gestiti da <form:*>
+    CERCA: <input id="userName">, <textarea id="note">
+    
+    VERIFICA maxlength = lunghezza campo DB
+    
+    STEP 1: Trova campo nel DB:
+    Esempio: suppliers.name = VARCHAR(255)
+             suppliers.email = VARCHAR(100)
+             suppliers.city = VARCHAR(50)
+    
+    STEP 2: Verifica maxlength corrisponde:
+    NO: <input id="city" />                      → MANCA maxlength!
+    NO: <input id="userName" maxlength="50" />   → DB VARCHAR(255) troppo restrittivo!
+    NO: <input id="userMail" maxlength="200" />  → DB VARCHAR(100) PERICOLOSO!
+    
+    OK: <input id="userName" maxlength="255" />  → DB VARCHAR(255)
+    OK: <input id="userMail" maxlength="100" />  → DB VARCHAR(100)
+    OK: <input id="city" maxlength="50" />       → DB VARCHAR(50)
+
+
+NON TOCCARE (gia protetti):
+- <spring:message code="..." /> → sempre safe
+- <form:input path="..." /> → Spring auto-escape
+- <form:option value="${opt.code}">${label}</form:option> → auto-escape
+- ${StateSupplierEnum.STOPPED.code} → enum numerico safe
+- var isStopped = (full.status == 1) → boolean true/false safe
+- ${enc:forJavaScript(entry.code)} in <script> → gia corretto
+
+
+RIASSUNTO VELOCE:
+──────────────────────────────────────────────────────────────────────────────────────────────────────
+Sei in tag <form:*>................: NON serve nulla (gia safe)
+Sei in JAVASCRIPT (<script>) usa...: encodeHTML(), encodeATTR(), encodeURIParam(), sanitizeInteger()
+Sei in JSP (fuori <script>) usa....: <c:out>, enc:forHtmlAttribute()
+Input utente.......................: maxlength DEVE essere = lunghezza campo DB
+──────────────────────────────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,65 @@
+Rispondi solo in italiano
+
+Cerca di essere sintetico e preciso (sono DSA/ADHD), senza spiegazioni ridondanti.
+
+VERIFICA SOLO QUESTI 3 PUNTI CRITICI:
+
+0. Analizza i file: 
+	- owasp-encoding.js allegato 
+	- JSP allegato
+
+1. Libreria OWASP caricata:	
+   Deve esserci: 
+    <%@ taglib prefix="enc" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>  
+    <script src="<spring:url value='/resources/js/owasp-encoding.js' />"></script> PRIMA degli altri <script>
+   
+2. Variabili da database in JSP (SOLO fuori da tag <form:*>):
+   - ${enc:forHtmlAttribute(... )} per attributi HTML (value="...", title="...", data-*="...")
+   - <c:out value="${...}"/> per contenuto HTML (testo visibile)
+   - ❌ MAI usare ${...} diretto in attributi HTML non-form
+
+3. Variabili JavaScript lato client (SOLO . val(), .text(), response.*, data.*, full.*):
+   - encodeHTML() prima di .html() / .append()
+   - encodeATTR() prima di .attr()
+   - encodeURIParam() prima di concatenare in URL/parametri AJAX
+   - sanitizeInteger() per ID numerici da input/AJAX
+
+IGNORA (già safe):
+- <spring:message>
+- Tag <form:*>
+- Enum Java numerici (StateSupplierEnum.CODE)
+- Boolean JS calcolati (var x = status == 1)
+- ${...} dentro <form:option>/<form:input>/<form:select>
+- Sintassi ${enc:forJavaScript(...)} dentro <script> (già corretta)
+- Parametri dentro <spring:url value="... ?param=..." />
+
+REGOLA CRITICA:
+- ${enc:forJavaScript(...)} = già protetto, IGNORA
+- sanitizeInteger()/encodeURIParam()/encodeHTML()/encodeATTR() = SOLO su dati lato client JavaScript
+- ❌ MAI mescolare: sanitizeInteger(${enc:forJavaScript(...)}) è SBAGLIATO
+
+PATTERN DA CERCARE:   
+JSP: 
+  - value="${variabile}" fuori da <form:*> → ${enc:forHtmlAttribute(variabile)}
+  - title="${variabile}" → ${enc:forHtmlAttribute(variabile)}
+  - <c:out> dentro attributi HTML → sostituire con enc:forHtmlAttribute()
+
+JavaScript: 
+  - $('#x').val() usato in: 'param='+.. ., . append(), .attr(), .html()
+  - Variabili concatenate in stringhe HTML/URL senza encoding
+  - response.campo / data.campo / full.campo
+
+ESEMPI: 
+❌ <input value="${mo.name}" />
+✅ <input value="${enc:forHtmlAttribute(mo.name)}" />
+
+❌ var url = 'search?id=' + $('#inputId').val();
+✅ var url = 'search?id=' + encodeURIParam($('#inputId').val());
+
+FORMATO RISPOSTA:
+- Codice corretto: "✅ Codice corretto."
+- Errori trovati:   
+  ❌ Riga X: codice attuale
+  
+JSP da analizzare:
+[Codice qui]
