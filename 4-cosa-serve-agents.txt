@@ -1,0 +1,102 @@
+A COSA SERVE UN AGENT (LLM)?
+============================
+
+DEFINIZIONE:
+-----------
+Un "agent" (agente) in questo contesto è un Large Language Model (LLM) come Claude Sonnet 4.5, 
+utilizzato per automatizzare l'analisi di sicurezza XSS del codice JSP/Spring MVC.
+
+
+SCOPO PRINCIPALE:
+----------------
+L'agent sostituisce la revisione manuale del codice, identificando automaticamente vulnerabilità XSS 
+seguendo le regole OWASP definite nei prompt di questo repository.
+
+
+VANTAGGI RISPETTO A CONTROLLO MANUALE:
+--------------------------------------
+1. VELOCITÀ: analizza centinaia di righe di codice in pochi secondi
+2. PRECISIONE: applica regole OWASP in modo consistente senza dimenticanze
+3. RIDUZIONE ERRORI UMANI: non si stanca e non salta controlli
+4. SCALABILITÀ: può analizzare molti file JSP in sequenza
+5. RISPARMIO TEMPO: libera sviluppatori per altre attività
+
+
+COME FUNZIONA:
+-------------
+1. L'agent riceve 3 input:
+   - Prompt con regole XSS (es: 1-xss-screening-prompt.txt)
+   - Libreria OWASP (owasp-encoding.js)
+   - File JSP da analizzare
+
+2. L'agent confronta il codice JSP con le regole OWASP
+
+3. L'agent restituisce:
+   - ✅ "Codice corretto" se tutto è conforme
+   - ❌ Lista errori con numeri di riga se trova vulnerabilità
+
+
+QUALE AGENT USARE:
+-----------------
+✅ RACCOMANDATO: Claude Sonnet 4.5 (Perplexity AI)
+   - Testato e validato
+   - Tasso errore minimo
+   - Nessun falso positivo
+
+❌ NON RACCOMANDATI:
+   - GPT-5: genera falsi positivi
+   - Kimi K2: genera falsi positivi gravi
+
+
+WORKFLOW CON AGENT:
+------------------
+STEP 1 (Screening): Agent fa controllo veloce (3 punti critici)
+STEP 2 (Audit): Agent fa controllo dettagliato (7 punti)
+STEP 3 (Manuale): Sviluppatore verifica checklist finale
+
+
+LIMITI DELL'AGENT:
+-----------------
+- NON verifica corrispondenza maxlength con VARCHAR database (STEP 3 manuale)
+- NON testa runtime il codice
+- NON controlla logica business
+- SOLO verifica conformità regole OWASP encoding
+
+
+QUANDO USARE L'AGENT:
+--------------------
+✅ Ogni volta che modifichi file JSP
+✅ Prima di commit/push
+✅ Durante code review
+✅ Per audit sicurezza periodici
+
+
+COSTO:
+-----
+- Token LLM variabili per file
+- Perplexity AI: uso gratuito limitato o abbonamento Pro
+- RISPARMIO: tempo sviluppatore (minuti vs ore)
+
+
+ESEMPIO UTILIZZO:
+----------------
+Input Agent:
+------------
+Usa regole da Augusto73/xssSecurityPrompt/1-xss-screening-prompt.txt
+
+JSP da analizzare:
+<input value="${supplier.name}" />
+
+Output Agent:
+-------------
+❌ Riga 1: <input value="${supplier.name}" />
+Correzione: <input value="${enc:forHtmlAttribute(supplier.name)}" />
+
+
+RIASSUNTO:
+---------
+L'agent è uno strumento automatico di analisi XSS che:
+- Applica regole OWASP al codice JSP
+- Identifica vulnerabilità in secondi
+- Riduce carico di lavoro manuale
+- Migliora qualità e sicurezza del codice

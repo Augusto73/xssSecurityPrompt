@@ -8,6 +8,7 @@ Suite completa di prompt per screening XSS su applicazioni JSP/Spring MVC.
 - **1-xss-screening-prompt.txt** - Livello 1: screening veloce
 - **2-xss-audit-prompt.txt** - Livello 2: audit dettagliato  
 - **3-xss-check-list-manuale.txt** - Livello 3: controllo manuale
+- **4-cosa-serve-agents.txt** - Spiegazione cosa sono gli agents e a cosa servono
 - **owasp-encoding.js** - Libreria JavaScript per encoding lato client
 
 ## 🚀 Quick Start
@@ -30,6 +31,10 @@ Suite completa di prompt per screening XSS su applicazioni JSP/Spring MVC.
 1. Apri `3-xss-check-list-manuale.txt`
 2. Segui checklist punto per punto
 3. Verifica maxlength = VARCHAR DB
+
+## 🤖 Cos'è un Agent?
+
+Un **agent** è un Large Language Model (LLM) che automatizza l'analisi XSS del codice JSP, applicando regole OWASP in modo consistente e veloce. Vedi `4-cosa-serve-agents.txt` per dettagli completi.
 
 ## 🎯 LLM Testato
 

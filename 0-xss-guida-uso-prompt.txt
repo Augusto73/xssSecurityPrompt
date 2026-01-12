@@ -1,6 +1,11 @@
 GUIDA USO PROMPT XSS - JSP/Spring MVC
 ======================================
 
+COS'È UN AGENT?
+---------------
+Un agent è un LLM che automatizza l'analisi XSS del codice JSP.
+Vedi file: 4-cosa-serve-agents.txt per dettagli completi.
+
 LLM TESTATO E VALIDATO:
 -----------------------
 Claude Sonnet 4.5 (Perplexity AI)
@@ -12,6 +17,7 @@ Kimi K2: genera falsi positivi gravi
 
 FILE USATI x SEQUENZA CONTROLLO:
 -----------
+LIVELLO 0: 4-cosa-serve-agents.txt (spiegazione agents)
 LIVELLO 1: 1-xss-screening-prompt.txt
 LIVELLO 2: 2-xss-audit-prompt.txt
 LIVELLO 3: 3-xss-check-list-manuale.txt
